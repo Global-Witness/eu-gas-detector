@@ -24,6 +24,8 @@ provider:
 functions:
   detector:
     handler: detector.lambda_handler
+    events:
+      - schedule: rate(1 days)
   tweeter:
     handler: tweeter.lambda_handler
     events:
