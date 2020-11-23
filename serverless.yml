@@ -1,0 +1,35 @@
+service: eu-gas-detector
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: eu-west-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "ses:SendEmail"
+        - "ses:SendRawEmail"
+      Resource: "*"
+  environment:
+    API_ID:
+    SOURCE_EMAIL:
+    RECIPIENT_EMAIL:
+    TWITTER_CONSUMER_KEY:
+    TWITTER_CONSUMER_SECRET:
+    TWITTER_ACCESS_TOKEN:
+    TWITTER_ACCESS_SECRET:
+
+functions:
+  detector:
+    handler: detector.lambda_handler
+  tweeter:
+    handler: tweeter.lambda_handler
+    events:
+      - http:
+          path: tweet
+          method: get
+
+plugins:
+  - serverless-python-requirements
