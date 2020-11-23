@@ -10,11 +10,8 @@ twitter = tweepy.API(auth)
 
 def lambda_handler(event, context):
     status = twitter.update_status(
-        'In the {}, {} is meeting with {} today' \
-        .format(
-            event['queryStringParameters']['institution'],
-            event['queryStringParameters']['host'],
-            event['queryStringParameters']['guest']))
+        'In the {institution}, {host} is meeting with {guest} today' \
+        .format(event['queryStringParameters']**))
     
     return {
         'statusCode': 200,
