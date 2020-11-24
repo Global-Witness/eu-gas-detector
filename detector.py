@@ -1,4 +1,4 @@
-import boto3, os, csv, requests, json
+import boto3, os, csv, requests, re, json, urllib.parse
 from datetime import datetime
 
 def lambda_handler(event, context):
@@ -20,26 +20,28 @@ def check_meetings(institution):
                 meeting = {
                     'date'  : row[3],
                     'host'  : row[1],
-                    'guest' : row[7]
+                    'guest' : row[7],
+                    'url'   : 'https://www.integritywatch.eu/'
                 }
             elif institution == 'European Parliament':
                 meeting = {
                     'date'  : row[10],
                     'host'  : row[0],
-                    'guest' : row[4]
+                    'guest' : row[4],
+                    'url'   : 'https://www.integritywatch.eu/mepmeetings'
                 }
 
             meeting['institution'] = institution
 
-            if meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
+            if meeting['date'] == datetime.today().strftime('%d/%m/%Y') and re.search(r'ga(s|z)', meeting['guest'].lower()):
                 send_confirmation_email(
                     subject = 'New meeting with {guest}'.format(**meeting),
                     body =
                         '<html><body>' + \
-                        'In the {institution}, {host} is meeting with {guest} today'.format(**meeting) + \
+                        os.environ['TWEET_TEMPLATE'].format(**meeting) + \
                         '<br/><br/>' + \
                         '<a href="https://' + os.environ['API_ID'] + '.execute-api.eu-west-1.amazonaws.com/dev/tweet?' + \
-                        'institution={institution}&host={host}&guest={guest}'.format(**meeting) + '">' + \
+                        urllib.parse.urlencode(meeting) + '">' + \
                         'Click here to send this Tweet!</a> If you don\'t think it\'s right, just ignore this email.' + \
                         '</body></html>')
 

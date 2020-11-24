@@ -1,4 +1,4 @@
-import os, tweepy
+import os, tweepy, urllib.parse
 
 auth = tweepy.OAuthHandler(
     os.environ['TWITTER_CONSUMER_KEY'],
@@ -9,9 +9,8 @@ auth.set_access_token(
 twitter = tweepy.API(auth)
 
 def lambda_handler(event, context):
-    status = twitter.update_status(
-        'In the {institution}, {host} is meeting with {guest} today' \
-        .format(event['queryStringParameters']**))
+    tweet = os.environ['TWEET_TEMPLATE'].format(**event['queryStringParameters'])
+    status = twitter.update_status(tweet)
     
     return {
         'statusCode': 200,
