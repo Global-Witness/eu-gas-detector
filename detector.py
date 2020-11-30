@@ -40,9 +40,9 @@ def check_meetings(institution):
                         '<html><body>' + \
                         os.environ['TWEET_TEMPLATE'].format(**meeting) + \
                         '<br/><br/>' + \
-                        '<a href="https://' + os.environ['API_ID'] + '.execute-api.eu-west-1.amazonaws.com/dev/tweet?' + \
+                        '<a href="https://' + os.environ['API_ID'] + '.execute-api.eu-west-1.amazonaws.com/dev?' + \
                         urllib.parse.urlencode(meeting) + '">' + \
-                        'Click here to send this Tweet!</a> If you don\'t think it\'s right, just ignore this email.' + \
+                        'Click here to send this Tweet and submit an FOI request!</a> If you don\'t think it\'s right, just ignore this email.' + \
                         '</body></html>')
 
 def send_confirmation_email(subject, body):
