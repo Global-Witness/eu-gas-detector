@@ -4,7 +4,7 @@ frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.6
   region: eu-west-1
   iamRoleStatements:
     - Effect: "Allow"
@@ -13,18 +13,18 @@ provider:
         - "ses:SendRawEmail"
       Resource: "*"
   environment:
-    API_ID: 
-    SOURCE_EMAIL: data@globalwitness.org
-    RECIPIENT_EMAIL: louisgoddard@gmail.com
+    API_ID: ${env:API_ID}
+    SOURCE_EMAIL: ${env:SOURCE_EMAIL}
+    RECIPIENT_EMAIL: ${env:RECIPIENT_EMAIL}
+    TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY}
+    TWITTER_CONSUMER_SECRET: ${env:TWITTER_CONSUMER_SECRET}
+    TWITTER_ACCESS_TOKEN: ${env:TWITTER_ACCESS_TOKEN}
+    TWITTER_ACCESS_SECRET: ${env:TWITTER_ACCESS_SECRET}
+    ASKTHEEU_EMAIL: ${env:ASKTHEEU_EMAIL}
+    ASKTHEEU_PASSWORD: ${env:ASKTHEEU_PASSWORD}
     TWEET_TEMPLATE: "Gas detected! In the {institution}, {host} is scheduled to meet with {guest} today. Find out more: {url}"
-    TWITTER_CONSUMER_KEY: 
-    TWITTER_CONSUMER_SECRET: 
-    TWITTER_ACCESS_TOKEN: 
-    TWITTER_ACCESS_SECRET: 
-    ASKTHEEU_EMAIL: bpace@globalwitness.org
-    ASKTHEEU_PASSWORD: 
-    FOI_SUBJECT: Access to documents request  
-    FOI_TEMPLATE: >
+    FOI_SUBJECT_TEMPLATE: "Access to documents request: {date} meeting between {host} and {guest}"
+    FOI_BODY_TEMPLATE: >
       Dear Sir or Madam,
       
       
@@ -70,6 +70,7 @@ functions:
 
 plugins:
   - serverless-python-requirements
+  - serverless-dotenv-plugin
 
 custom:
   pythonRequirements:

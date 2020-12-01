@@ -18,20 +18,22 @@ def check_meetings(institution):
         for row in meetings:
             if institution == 'European Commission':
                 meeting = {
-                    'date'  : row[3],
-                    'host'  : row[1],
-                    'guest' : row[7],
-                    'url'   : 'https://www.integritywatch.eu/'
+                    'date'           : row[3],
+                    'institution'    : institution,
+                    'host'           : row[1],
+                    'public_body_id' : '576',
+                    'guest'          : row[7],
+                    'url'            : 'https://www.integritywatch.eu/'
                 }
             elif institution == 'European Parliament':
                 meeting = {
-                    'date'  : row[10],
-                    'host'  : row[0],
-                    'guest' : row[4],
-                    'url'   : 'https://www.integritywatch.eu/mepmeetings'
+                    'date'           : row[10],
+                    'institution'    : institution,
+                    'host'           : row[0],
+                    'public_body_id' : '546',
+                    'guest'          : row[4],
+                    'url'            : 'https://www.integritywatch.eu/mepmeetings'
                 }
-
-            meeting['institution'] = institution
 
             if meeting['date'] == datetime.today().strftime('%d/%m/%Y') and re.search(r'ga(s|z)', meeting['guest'].lower()):
                 send_confirmation_email(
