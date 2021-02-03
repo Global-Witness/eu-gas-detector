@@ -68,6 +68,10 @@ functions:
           method: get
           path: /
 
+package:
+  include:
+   - data/**
+
 plugins:
   - serverless-python-requirements
   - serverless-dotenv-plugin
