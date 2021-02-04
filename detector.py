@@ -64,12 +64,14 @@ def lambda_handler(event, context):
         for meeting in meetings:
             hit = False
             for target in targets.keys():
-                if target in [g['id'] for g in meeting['guests']]: # and meeting['date'] == '13/01/2021': #datetime.today().strftime('%d/%m/%Y'):
+                if target in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
                     hit = True
         
             if hit == True:
-                meeting['guests_string'] = join_with_and([targets.get(g['id']) for g in meeting['guests'] if targets.get(g['id']) is not None])
+                meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
+                meeting['guests_string_twitter'] = join_with_and([targets.get(g['id']) for g in meeting['guests'] if targets.get(g['id']) is not None])
                 meeting['hosts_string'] = join_with_and(meeting['hosts'])
+                meeting['hosts_string_twitter'] = join_with_and(meeting['hosts'])
                 
                 send_confirmation_email(
                     subject = 'New meeting with {guests_string}'.format(**meeting),
