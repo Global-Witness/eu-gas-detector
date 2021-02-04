@@ -22,8 +22,8 @@ provider:
     TWITTER_ACCESS_SECRET: ${env:TWITTER_ACCESS_SECRET}
     ASKTHEEU_EMAIL: ${env:ASKTHEEU_EMAIL}
     ASKTHEEU_PASSWORD: ${env:ASKTHEEU_PASSWORD}
-    TWEET_TEMPLATE: "Gas detected! In the {institution}, {host} is scheduled to meet with {guest} today. Find out more: {url}"
-    FOI_SUBJECT_TEMPLATE: "Access to documents request: {date} meeting between {host} and {guest}"
+    TWEET_TEMPLATE: "Gas detected! {hosts_string} is scheduled to meet with {guests_string} today."
+    FOI_SUBJECT_TEMPLATE: "Access to documents request: {date} meeting between {hosts_string} and {guests_string}"
     FOI_BODY_TEMPLATE: >
       Dear Sir or Madam,
       
