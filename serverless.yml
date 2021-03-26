@@ -12,6 +12,9 @@ provider:
         - "ses:SendEmail"
         - "ses:SendRawEmail"
       Resource: "*"
+  deploymentBucket:
+    name: serverless-deployment-gw
+    serverSideEncryption: AES256
   environment:
     API_ID: ${env:API_ID}
     SOURCE_EMAIL: ${env:SOURCE_EMAIL}
@@ -75,6 +78,7 @@ package:
 plugins:
   - serverless-python-requirements
   - serverless-dotenv-plugin
+  - serverless-deployment-bucket
 
 custom:
   pythonRequirements:
