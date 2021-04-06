@@ -55,23 +55,25 @@ def lambda_handler(event, context):
         meetings += get_meetings_data(etree.HTML(r.text).xpath('//div[@id="transparency"]//a/@href')[0], 'Commissioner')
         meetings += get_meetings_data(etree.HTML(r.text).xpath('//div[@id="transparency"]//a/@href')[1], 'Cabinet')
 
-        with open('data/targets.csv', 'r') as i:
-            target_rows = list(csv.reader(i.readlines()))
-            targets = {}
-            for row in target_rows:
-                targets[row[1]] = row[2]
+        with open('data/entities.csv', 'r') as i:
+            entity_rows = list(csv.reader(i.readlines()))
+            entities = {}
+            for row in entity_rows:
+                entities[row[0]] = row[1]
 
         for meeting in meetings:
             hit = False
-            for target in targets.keys():
-                if target in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
+            # Using a combined list of hosts and guests here is a bit hacky
+            for entity in entities.keys():
+                #if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
+                if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == '23/03/2021':
                     hit = True
         
             if hit == True:
                 meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
-                meeting['guests_string_twitter'] = join_with_and([targets.get(g['id']) for g in meeting['guests'] if targets.get(g['id']) is not None])
+                meeting['guests_string_twitter'] = join_with_and([entities.get(g['id']) for g in meeting['guests'] if entities.get(g['id']) is not None])
                 meeting['hosts_string'] = join_with_and(meeting['hosts'])
-                meeting['hosts_string_twitter'] = join_with_and(meeting['hosts'])
+                meeting['hosts_string_twitter'] = join_with_and([entities.get(h) if entities.get(h) is not None else h for h in meeting['hosts']])
                 
                 send_confirmation_email(
                     subject = 'New meeting with {guests_string}'.format(**meeting),
