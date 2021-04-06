@@ -65,8 +65,7 @@ def lambda_handler(event, context):
             hit = False
             # Using a combined list of hosts and guests here is a bit hacky
             for entity in entities.keys():
-                #if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
-                if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == '23/03/2021':
+                if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
                     hit = True
         
             if hit == True:
