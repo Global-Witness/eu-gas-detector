@@ -65,17 +65,20 @@ def lambda_handler(event, context):
             hit = False
             # Using a combined list of hosts and guests here is a bit hacky
             for entity in entities.keys():
-                if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
+                #if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
+                if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == '23/03/2021':
                     hit = True
         
             if hit == True:
                 meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
-                meeting['guests_string_twitter'] = join_with_and([entities.get(g['id']) for g in meeting['guests'] if entities.get(g['id']) is not None])
+                meeting['guests_string_twitter'] = join_with_and(
+                    [g['name'] + ' (' + entities.get(g['id']) + ')' for g in meeting['guests'] if entities.get(g['id']) is not None])
                 meeting['hosts_string'] = join_with_and(meeting['hosts'])
-                meeting['hosts_string_twitter'] = join_with_and([entities.get(h) if entities.get(h) is not None else h for h in meeting['hosts']])
+                meeting['hosts_string_twitter'] = join_with_and(
+                    [h + ' (' + entities.get(h) + ')' if entities.get(h) is not None else h for h in meeting['hosts']])
                 
                 send_confirmation_email(
-                    subject = 'New meeting with {guests_string}'.format(**meeting),
+                    subject = 'New meeting with {guests_string_twitter}'.format(**meeting),
                     body =
                         '<html><body>' + \
                         os.environ['TWEET_TEMPLATE'].format(**meeting) + \
