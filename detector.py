@@ -1,6 +1,14 @@
-import boto3, os, csv, requests, re, json, urllib.parse
+import boto3, os, tweepy, csv, requests, re, json, urllib.parse, html
 from datetime import datetime
 from lxml import etree
+
+auth = tweepy.OAuthHandler(
+    os.environ['TWITTER_CONSUMER_KEY'],
+    os.environ['TWITTER_CONSUMER_SECRET'])
+auth.set_access_token(
+    os.environ['TWITTER_ACCESS_TOKEN'],
+    os.environ['TWITTER_ACCESS_SECRET'])
+twitter = tweepy.API(auth)
 
 def join_with_and(l):
     return ' and '.join([', '.join(l[:-1]), l[-1]] if len(l) > 2 else l)
@@ -27,8 +35,10 @@ def get_meetings_data(url, host_type):
                     'id': urllib.parse.parse_qs(urllib.parse.urlsplit(guest.xpath('.//a/@href')[0]).query)['id'][0]
                 })
 
+            date = datetime.strptime(meeting.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(), '%d/%m/%Y')
+
             meetings.append({
-                'date': meeting.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(),
+                'date': datetime.strftime(date, '%B %-d'),
                 'hosts': hosts,
                 'guests': guests,
                 'public_body_id': '576'
@@ -47,8 +57,11 @@ def send_confirmation_email(subject, body):
     return response
 
 def lambda_handler(event, context):
+    latest_tweets = [html.unescape(t.full_text) for t in twitter.user_timeline(count = 100, tweet_mode = 'extended')]
+
     r = requests.get('https://ec.europa.eu/commission/commissioners/2019-2024_en')
-    commissioner_urls = etree.HTML(r.text).xpath('//h3[@class="listing__title"]/a/@href')
+    commissioner_urls = set(etree.HTML(r.text).xpath('//h3[@class="listing__title"]/a/@href'))
+
     for url in commissioner_urls:
         meetings = []
         r = requests.get(url)
@@ -65,7 +78,7 @@ def lambda_handler(event, context):
             hit = False
             # Using a combined list of hosts and guests here is a bit hacky
             for entity in entities.keys():
-                if entity in [g['id'] for g in meeting['guests']] and meeting['date'] == datetime.today().strftime('%d/%m/%Y'):
+                if entity in [g['id'] for g in meeting['guests']]:
                     hit = True
         
             if hit == True:
@@ -76,13 +89,19 @@ def lambda_handler(event, context):
                 meeting['hosts_string_twitter'] = join_with_and(
                     [h + ' (' + entities.get(h) + ')' if entities.get(h) is not None else h for h in meeting['hosts']])
                 
-                send_confirmation_email(
-                    subject = 'New meeting with {guests_string_twitter}'.format(**meeting),
-                    body =
-                        '<html><body>' + \
-                        os.environ['TWEET_TEMPLATE'].format(**meeting) + \
-                        '<br/><br/>' + \
-                        '<a href="https://' + os.environ['API_ID'] + '.execute-api.eu-west-1.amazonaws.com/dev?' + \
-                        urllib.parse.urlencode(meeting) + '">' + \
-                        'Click here to send this Tweet and submit an FOI request!</a> If you don\'t think it\'s right, just ignore this email.' + \
-                        '</body></html>')
+                tweet = os.environ['TWEET_TEMPLATE'].format(**meeting)
+
+                if len(tweet) > 280:
+                    tweet = tweet.split('\n')[0] 
+
+                if tweet not in latest_tweets:
+                    send_confirmation_email(
+                        subject = 'New meeting with {guests_string_twitter}'.format(**meeting),
+                        body =
+                            '<html><body>' + \
+                            tweet + \
+                            '<br/><br/>' + \
+                            '<a href="https://' + os.environ['API_ID'] + '.execute-api.eu-west-1.amazonaws.com/dev?' + \
+                            urllib.parse.urlencode(meeting) + '">' + \
+                            'Click here to send this Tweet and submit an FOI request!</a> If you don\'t think it\'s right, just ignore this email.' + \
+                            '</body></html>')

@@ -25,9 +25,13 @@ provider:
     TWITTER_ACCESS_SECRET: ${env:TWITTER_ACCESS_SECRET}
     ASKTHEEU_EMAIL: ${env:ASKTHEEU_EMAIL}
     ASKTHEEU_PASSWORD: ${env:ASKTHEEU_PASSWORD}
-    TWEET_TEMPLATE: "Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} is scheduled for today."
+    TWEET_TEMPLATE: >-
+      Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} was scheduled for {date}.
+ 
+      
+      Just like big tobacco is banned from lobbying on health, the EU must stop letting fossil gas companies undermine #ClimateAction.
     FOI_SUBJECT_TEMPLATE: "Access to documents request: {date} meeting between {hosts_string} and {guests_string}"
-    FOI_BODY_TEMPLATE: >
+    FOI_BODY_TEMPLATE: >-
       Dear Sir or Madam,
       
       

@@ -12,6 +12,10 @@ twitter = tweepy.API(auth)
 def lambda_handler(event, context):
     # Send tweet
     tweet = os.environ['TWEET_TEMPLATE'].format(**event['queryStringParameters'])
+    
+    if len(tweet) > 280:
+        tweet = tweet.split('\n')[0] 
+    
     status = twitter.update_status(tweet)
 
     # Log in to AskTheEU
