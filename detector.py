@@ -13,7 +13,7 @@ twitter = tweepy.API(auth)
 def join_with_and(l):
     return ' and '.join([', '.join(l[:-1]), l[-1]] if len(l) > 2 else l)
 
-def get_meetings_data(url, host_type):
+def get_meetings_data(url, host_type, public_body_id):
     meetings = []
     r = requests.get(url)
     
@@ -32,16 +32,20 @@ def get_meetings_data(url, host_type):
                 guest = etree.HTML('<' + str(guest).replace('<!-- ', '').replace('-->', ''))
                 guests.append({
                     'name': guest.xpath('.//a/text()')[0],
-                    'id': urllib.parse.parse_qs(urllib.parse.urlsplit(guest.xpath('.//a/@href')[0]).query)['id'][0]
+                    'id': urllib.parse.parse_qs(
+                        urllib.parse.urlsplit(
+                            guest.xpath('.//a/@href')[0]).query)['id'][0]
                 })
 
-            date = datetime.strptime(meeting.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(), '%d/%m/%Y')
+            date = datetime.strptime(
+                meeting.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(),
+                '%d/%m/%Y')
 
             meetings.append({
                 'date': datetime.strftime(date, '%B %-d'),
                 'hosts': hosts,
                 'guests': guests,
-                'public_body_id': '576'
+                'public_body_id': public_body_id
             })
    
     return meetings
@@ -57,22 +61,36 @@ def send_confirmation_email(subject, body):
     return response
 
 def lambda_handler(event, context):
-    latest_tweets = [html.unescape(t.full_text) for t in twitter.user_timeline(count = 100, tweet_mode = 'extended')]
+    latest_tweets = [
+        html.unescape(t.full_text) for t in
+        twitter.user_timeline(count = 100, tweet_mode = 'extended')
+    ]
 
-    r = requests.get('https://ec.europa.eu/commission/commissioners/2019-2024_en')
-    commissioner_urls = set(etree.HTML(r.text).xpath('//h3[@class="listing__title"]/a/@href'))
+    with open('data/entities.csv', 'r') as i:
+        entity_rows = list(csv.reader(i.readlines()))
+        entities = {}
+        for row in entity_rows:
+            entities[row[0]] = row[1]
 
-    for url in commissioner_urls:
+    with open('data/public-bodies.csv', 'r') as i:
+        public_body_rows = list(csv.reader(i.readlines()))
+        public_bodies = {}
+        for row in public_body_rows:
+            public_bodies[row[0]] = row[1]
+
+    for url in public_bodies.keys():
         meetings = []
         r = requests.get(url)
-        meetings += get_meetings_data(etree.HTML(r.text).xpath('//div[@id="transparency"]//a/@href')[0], 'Commissioner')
-        meetings += get_meetings_data(etree.HTML(r.text).xpath('//div[@id="transparency"]//a/@href')[1], 'Cabinet')
 
-        with open('data/entities.csv', 'r') as i:
-            entity_rows = list(csv.reader(i.readlines()))
-            entities = {}
-            for row in entity_rows:
-                entities[row[0]] = row[1]
+        meetings += get_meetings_data(
+            etree.HTML(r.text).xpath('//div[@id="transparency"]//a/@href')[0],
+            'Commissioner',
+            public_bodies[url])
+
+        meetings += get_meetings_data(etree.HTML(r.text).xpath(
+            '//div[@id="transparency"]//a/@href')[1],
+            'Cabinet',
+            public_bodies[url])
 
         for meeting in meetings:
             hit = False
@@ -92,7 +110,9 @@ def lambda_handler(event, context):
                 tweet = os.environ['TWEET_TEMPLATE'].format(**meeting)
 
                 if len(tweet) > 280:
-                    tweet = tweet.split('\n')[0] 
+                    tweet = tweet.split('\n')[0]
+
+                print(meeting)
 
                 if tweet not in latest_tweets:
                     send_confirmation_email(
