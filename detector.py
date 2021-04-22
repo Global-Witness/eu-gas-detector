@@ -49,7 +49,7 @@ def get_meetings_data(url, host_type):
 def send_confirmation_email(subject, body):
     response = boto3.client('ses').send_email(
         Source = os.environ['SOURCE_EMAIL'],
-        Destination = {'ToAddresses': [os.environ['RECIPIENT_EMAIL']]},
+        Destination = {'ToAddresses': os.environ['RECIPIENT_EMAILS'].split(',')},
         Message = {
             'Subject': {'Data': subject},
             'Body': {'Html': {'Data': body} } })
