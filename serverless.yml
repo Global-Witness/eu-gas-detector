@@ -29,7 +29,7 @@ provider:
       Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} was scheduled for {date}.
  
       
-      Just like big tobacco is banned from lobbying on health, the EU must stop letting fossil gas companies undermine #ClimateAction.
+      Just like big tobacco is banned from lobbying on health, we need #FossilFreePolitics to achieve #ClimateAction
     FOI_SUBJECT_TEMPLATE: "Access to documents request: {date} meeting between {hosts_string} and {guests_string}"
     FOI_BODY_TEMPLATE: >-
       Dear Sir or Madam,
