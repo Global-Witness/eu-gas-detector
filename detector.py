@@ -51,9 +51,13 @@ def get_meetings_data(url, host_type, public_body_id):
     return meetings
 
 def send_confirmation_email(subject, body):
+
+    for address in os.environ['RECIPIENT_EMAILS'].split(','):
+        print('Sending email to {}...'.format(address))
+
     response = boto3.client('ses').send_email(
         Source = os.environ['SOURCE_EMAIL'],
-        Destination = {'ToAddresses': os.environ['RECIPIENT_EMAILS'].split(',')},
+        Destinatiot = {'ToAddresses': os.environ['RECIPIENT_EMAILS'].split(',')},
         Message = {
             'Subject': {'Data': subject},
             'Body': {'Html': {'Data': body} } })
@@ -115,7 +119,7 @@ def lambda_handler(event, context):
                 print(meeting)
 
                 if tweet not in latest_tweets:
-                    send_confirmation_email(
+                    response = send_confirmation_email(
                         subject = 'New meeting with {guests_string_twitter}'.format(**meeting),
                         body =
                             '<html><body>' + \
@@ -125,3 +129,5 @@ def lambda_handler(event, context):
                             urllib.parse.urlencode(meeting) + '">' + \
                             'Click here to send this Tweet and submit an FOI request!</a> If you don\'t think it\'s right, just ignore this email.' + \
                             '</body></html>')
+                    
+                    print(response)
