@@ -57,7 +57,7 @@ def send_confirmation_email(subject, body):
 
     response = boto3.client('ses').send_email(
         Source = os.environ['SOURCE_EMAIL'],
-        Destinatiot = {'ToAddresses': os.environ['RECIPIENT_EMAILS'].split(',')},
+        Destination = {'ToAddresses': os.environ['RECIPIENT_EMAILS'].split(',')},
         Message = {
             'Subject': {'Data': subject},
             'Body': {'Html': {'Data': body} } })
