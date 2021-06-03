@@ -10,7 +10,7 @@ To run your own version of the bot, create a `.env` file in the root of this rep
 
 | Variable name           | Description |
 |-------------------------|-------------|
-| API_ID                  | ID for the `actor.py` function provided by API Gateway—get this from the public URL returned when you deploy the functions. |
+| API_ID                  | ID for the `actor.py` function provided by API Gateway—get this from the endpoint URL shown under the 'Service Information' heading when you deploy the functions, e.g. `https://$API_ID.execute-api.eu-west-1.amazonaws.com/dev/`. |
 | SOURCE_EMAIL            | Email address to send confirmation emails from—this must already be authorised to send email on your behalf in SES. |
 | RECIPIENT_EMAILS        | Email addresses to receive confirmation emails (comma-separated list). |
 | TWITTER_CONSUMER_KEY    | Credential for the Twitter API—get it from your [Twitter apps page](https://developer.twitter.com/en/portal/projects-and-apps). |
