@@ -50,34 +50,6 @@ def lambda_handler(event, context):
             'preview': 'true'
         })
 
-    # Send request
-    draft_page = etree.HTML(r.text)
-    #r = s.post(
-    #    url = domain + '/en/alaveteli_pro/draft_info_requests',
-    #    data = {
-    #        'utf8': '✓',
-    #        'authenticity_token': draft_page.xpath('//input[@name="authenticity_token"]/@value')[0],
-    #        'draft_id': draft_page.xpath('//input[@id="draft_id"]/@value')[0],
-    #        'commit': 'Send+request'
-    #    })
-
-    #return {
-    #    'statusCode': 200,
-    #    'body': {
-    #        'twitter_response': status._json,
-    #        'asktheeu_response': {
-    #            'text': r.text,
-    #            'headers': dict(r.headers),
-    #            'status_code': r.status_code,
-    #            'request': {
-    #                'url': r.request.url,
-    #                'method': r.request.method,
-    #                'headers': dict(r.request.headers),
-    #            }
-    #        }
-    #    }
-    #}
-
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'text/html'},
