@@ -18,7 +18,7 @@ provider:
     name: serverless-deployment-gw
     serverSideEncryption: AES256
   environment:
-    API_ID: ${env:API_ID}
+    API_ID: { "Ref" : "ApiGatewayRestApi" }
     DYNANODB_TABLE: ${env:DYNAMODB_TABLE}
     SOURCE_EMAIL: ${env:SOURCE_EMAIL}
     RECIPIENT_EMAILS: ${env:RECIPIENT_EMAILS}

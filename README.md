@@ -10,7 +10,6 @@ To run your own version of the bot, create a `.env` file in the root of this rep
 
 | Variable name           | Description |
 |-------------------------|-------------|
-| API_ID                  | ID for the `actor.py` function provided by API Gateway—get this from the endpoint URL shown under the 'Service Information' heading when you deploy the functions, e.g. `https://$API_ID.execute-api.eu-west-1.amazonaws.com/dev/`. |
 | SOURCE_EMAIL            | Email address to send confirmation emails from—this must already be authorised to send email on your behalf in SES. |
 | RECIPIENT_EMAILS        | Email addresses to receive confirmation emails (comma-separated list). |
 | TWITTER_CONSUMER_KEY    | Credential for the Twitter API—get it from your [Twitter apps page](https://developer.twitter.com/en/portal/projects-and-apps). |
@@ -26,6 +25,4 @@ At set intervals (once a day by default), `detector.py` loads the lists of meeti
 
 Once the meeting information has been extracted, it's compared to a static list of relevant hosts and guests given in `data/entities.csv`. Hosts are keyed by name and guests by their Transparency Register ID. It also adds the relevant public body ID from AskTheEU.org to the data, using the `data/public-bodies.csv` lookup table—this allows FOI requests to be sent to the correct departments.
 
-When the script finds a meeting with a relevant company it checks the bot's Twitter timeline to see if it has already been tweeted.\* If it's a new meeting the script sends a confirmation email to the addresses given in the `RECIPIENT_EMAILS` environment variable, including a link to trigger the `actor.py` function. When the link is clicked, `actor.py` uses the Twitter API to send a tweet; it also logs in to AskTheEU.org and creates a draft FOI request for the meeting minutes, which can be checked over and sent manually by a Global Witness campaigner.
-
-\* Using the Twitter timeline itself to store the bot's 'state' is a trade-off–it removes the need for a database storing details of past meetings but makes it difficult to change the template text for tweets once the bot is up and running, as an exact string comparison is used to check whether a meeting has already been posted.
+When the script finds a meeting with a relevant company it hashes it to generate a unique ID and puts it in a DynamoDB table. If the meeting isn't already in the database and a corresponding tweet doesn't exist on the Twitter timeline, the script sends a confirmation email to the addresses given in the `RECIPIENT_EMAILS` environment variable, including a link to trigger the `actor.py` function. When the link is clicked, `actor.py` uses the Twitter API to send a tweet; it also logs in to AskTheEU.org and creates a draft FOI request for the meeting minutes, which can be checked over and sent manually by a Global Witness campaigner.
