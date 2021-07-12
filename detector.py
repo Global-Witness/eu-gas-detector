@@ -1,6 +1,9 @@
-import boto3, os, tweepy, csv, requests, re, json, urllib.parse, html
+import boto3, os, tweepy, csv, requests, re, json, urllib.parse, html, hashlib
 from datetime import datetime
 from lxml import etree
+
+ddb = boto3.resource('dynamodb').Table(os.environ['DYNAMODB_TABLE'])
+ses = boto3.client('ses')
 
 auth = tweepy.OAuthHandler(
     os.environ['TWITTER_CONSUMER_KEY'],
@@ -19,43 +22,49 @@ def get_meetings_data(url, host_type, public_body_id):
     
     if r.status_code == 200:
         meeting_table = etree.HTML(r.text).xpath('//table[@id="listMeetingsTable"]/tbody/tr')
-        for meeting in meeting_table:
+        for meeting_row in meeting_table:
             if host_type == 'Commissioner':
                 hosts = [h.strip() for h in etree.HTML(r.text).xpath('(//nav/ol//li//a)[3]/text()')]
                 column_indices = {'date': '1', 'guests': '3'}
             elif host_type == 'Cabinet':
-                hosts = [h.strip() for h in meeting.xpath('.//td[1]/text()')][:-1]
+                hosts = [h.strip() for h in meeting_row.xpath('.//td[1]/text()')][:-1]
                 column_indices = {'date': '2', 'guests': '4'}
+  
+            meeting = {
+                'public_body_id': public_body_id,
+                'hosts': hosts,
+                'guests': []
+            }
 
-            guests = []
-            for guest in meeting.xpath('.//td[{guests}]/comment()'.format(**column_indices)):
+            for guest in meeting_row.xpath('.//td[{guests}]/comment()'.format(**column_indices)):
                 guest = etree.HTML('<' + str(guest).replace('<!-- ', '').replace('-->', ''))
-                guests.append({
+                meeting['guests'].append({
                     'name': guest.xpath('.//a/text()')[0],
                     'id': urllib.parse.parse_qs(
                         urllib.parse.urlsplit(
                             guest.xpath('.//a/@href')[0]).query)['id'][0]
-                })
+                    })
+            
+            meeting['date'] = datetime \
+                .strptime(
+                    meeting_row.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(),
+                    '%d/%m/%Y') \
+                .strftime('%B %-d')
 
-            date = datetime.strptime(
-                meeting.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(),
-                '%d/%m/%Y')
+            meeting_hash = meeting
+            meeting_hash = json.dumps(meeting_hash, sort_keys = True).encode('utf-8')
+            meeting_hash = hashlib.md5(meeting_hash).hexdigest()
+            meeting['id'] = meeting_hash
+            
+            meetings.append(meeting)
 
-            meetings.append({
-                'date': datetime.strftime(date, '%B %-d'),
-                'hosts': hosts,
-                'guests': guests,
-                'public_body_id': public_body_id
-            })
-   
     return meetings
 
 def send_confirmation_email(subject, body):
-
     for address in os.environ['RECIPIENT_EMAILS'].split(','):
         print('Sending email to {}...'.format(address))
 
-    response = boto3.client('ses').send_email(
+    response = ses.send_email(
         Source = os.environ['SOURCE_EMAIL'],
         Destination = {'ToAddresses': os.environ['RECIPIENT_EMAILS'].split(',')},
         Message = {
@@ -91,8 +100,8 @@ def lambda_handler(event, context):
             'Commissioner',
             public_bodies[url])
 
-        meetings += get_meetings_data(etree.HTML(r.text).xpath(
-            '//div[@id="transparency"]//a/@href')[1],
+        meetings += get_meetings_data(
+            etree.HTML(r.text).xpath('//div[@id="transparency"]//a/@href')[1],
             'Cabinet',
             public_bodies[url])
 
@@ -103,7 +112,9 @@ def lambda_handler(event, context):
                 if entity in [g['id'] for g in meeting['guests']]:
                     hit = True
         
-            if hit == True:
+            if hit == True and 'Item' not in ddb.get_item(Key = {'id': meeting['id']}):
+                ddb.put_item(Item = meeting)
+                
                 meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
                 meeting['guests_string_twitter'] = join_with_and(
                     [g['name'] + ' (' + entities.get(g['id']) + ')' for g in meeting['guests'] if entities.get(g['id']) is not None])

@@ -7,16 +7,19 @@ provider:
   runtime: python3.6
   region: eu-west-1
   iamRoleStatements:
-    - Effect: "Allow"
+    - Effect: Allow
       Action:
-        - "ses:SendEmail"
-        - "ses:SendRawEmail"
+        - ses:SendEmail
+        - ses:SendRawEmail
+        - dynamodb:GetItem
+        - dynamodb:PutItem
       Resource: "*"
   deploymentBucket:
     name: serverless-deployment-gw
     serverSideEncryption: AES256
   environment:
     API_ID: ${env:API_ID}
+    DYNANODB_TABLE: ${env:DYNAMODB_TABLE}
     SOURCE_EMAIL: ${env:SOURCE_EMAIL}
     RECIPIENT_EMAILS: ${env:RECIPIENT_EMAILS}
     TWITTER_CONSUMER_KEY: ${env:TWITTER_CONSUMER_KEY}
