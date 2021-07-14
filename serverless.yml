@@ -29,7 +29,7 @@ provider:
     ASKTHEEU_EMAIL: ${env:ASKTHEEU_EMAIL}
     ASKTHEEU_PASSWORD: ${env:ASKTHEEU_PASSWORD}
     TWEET_TEMPLATE: >-
-      Gas detected! A meeting between EU official {hosts_string_twitter} and gas company {guests_string_twitter} was scheduled for {date}.
+      Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} was scheduled for {date}.
  
       
       Just like big tobacco is banned from lobbying on health, we need #FossilFreePolitics to achieve #ClimateAction

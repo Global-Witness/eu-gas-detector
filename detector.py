@@ -51,10 +51,9 @@ def get_meetings_data(url, host_type, public_body_id):
                     '%d/%m/%Y') \
                 .strftime('%B %-d')
 
-            meeting_hash = meeting
-            meeting_hash = json.dumps(meeting_hash, sort_keys = True).encode('utf-8')
-            meeting_hash = hashlib.md5(meeting_hash).hexdigest()
-            meeting['id'] = meeting_hash
+            meeting['id'] = hashlib \
+                .md5(json.dumps(meeting, sort_keys = True).encode('utf-8')) \
+                .hexdigest()
             
             meetings.append(meeting)
 
@@ -75,8 +74,8 @@ def send_confirmation_email(subject, body):
 
 def lambda_handler(event, context):
     latest_tweets = [
-        html.unescape(t.full_text) for t in
-        twitter.user_timeline(count = 100, tweet_mode = 'extended')
+        html.unescape(t.full_text)
+        for t in twitter.user_timeline(count = 100, tweet_mode = 'extended')
     ]
 
     with open('data/entities.csv', 'r') as i:
@@ -114,13 +113,37 @@ def lambda_handler(event, context):
         
             if hit == True and 'Item' not in ddb.get_item(Key = {'id': meeting['id']}):
                 ddb.put_item(Item = meeting)
+
+                meeting['guests'] = [
+                    g for g in meeting['guests']
+                    if entities.get(g['id']) is not None
+                ]
                 
-                meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
-                meeting['guests_string_twitter'] = join_with_and(
-                    [g['name'] + ' (' + entities.get(g['id']) + ')' for g in meeting['guests'] if entities.get(g['id']) is not None])
+                hosts_twitter = [
+                    h + ' (' + entities.get(h) + ')'
+                    if entities.get(h) is not None else h
+                    for h in meeting['hosts']
+                ]
+                
+                guests_twitter = [
+                    g['name'] + ' (' + entities.get(g['id']) + ')'
+                    for g in meeting['guests']
+                ]
+
+                if len(meeting['hosts']) > 1:
+                    hosts_title = 'EU officials'
+                else:
+                    hosts_title = 'EU official'
+
+                if len(meeting['guests']) > 1:
+                    guests_title = 'gas companies'
+                else:
+                    guests_title = 'gas company'
+
                 meeting['hosts_string'] = join_with_and(meeting['hosts'])
-                meeting['hosts_string_twitter'] = join_with_and(
-                    [h + ' (' + entities.get(h) + ')' if entities.get(h) is not None else h for h in meeting['hosts']])
+                meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
+                meeting['hosts_string_twitter'] = ' '.join([hosts_title, join_with_and(hosts_twitter)])
+                meeting['guests_string_twitter'] = ' '.join([guests_title, join_with_and(guests_twitter)])
                 
                 tweet = os.environ['TWEET_TEMPLATE'].format(**meeting)
 
