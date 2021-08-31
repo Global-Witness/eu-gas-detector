@@ -131,14 +131,14 @@ def lambda_handler(event, context):
                 ]
 
                 if len(meeting['hosts']) > 1:
-                    hosts_title = 'EU officials'
+                    hosts_title = os.environ['HOSTS_TEMPLATE']
                 else:
-                    hosts_title = 'EU official'
+                    hosts_title = os.environ['HOST_TEMPLATE']
 
                 if len(meeting['guests']) > 1:
-                    guests_title = 'gas companies'
+                    guests_title = os.environ['GUESTS_TEMPLATE']
                 else:
-                    guests_title = 'gas company'
+                    guests_title = os.environ['GUEST_TEMPLATE']
 
                 meeting['hosts_string'] = join_with_and(meeting['hosts'])
                 meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])

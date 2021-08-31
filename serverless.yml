@@ -28,6 +28,10 @@ provider:
     TWITTER_ACCESS_SECRET: ${env:TWITTER_ACCESS_SECRET}
     ASKTHEEU_EMAIL: ${env:ASKTHEEU_EMAIL}
     ASKTHEEU_PASSWORD: ${env:ASKTHEEU_PASSWORD}
+    GUEST_TEMPLATE: gas company
+    GUESTS_TEMPLATE: gas companies
+    HOST_TEMPLATE: EU official
+    HOSTS_TEMPLATE: EU officials
     TWEET_TEMPLATE: >-
       Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} was scheduled for {date}.
  
