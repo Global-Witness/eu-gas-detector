@@ -1,4 +1,5 @@
 import os, tweepy, urllib.parse, requests, json
+from datetime import datetime
 from lxml import etree
 
 auth = tweepy.OAuthHandler(
@@ -12,9 +13,12 @@ twitter = tweepy.API(auth)
 def lambda_handler(event, context):
     # Send tweet
     tweet = os.environ['TWEET_TEMPLATE'].format(**event['queryStringParameters'])
-    
-    if len(tweet) > 280:
-        tweet = tweet.split('\n')[0] 
+
+    if (datetime.today() - datetime.strptime(event['queryStringParameters']['date'], '%Y-%m-%d')).days >= int(os.environ['TWEET_HISTORIC_CUTOFF_DAYS']):
+        tweet = tweet + os.environ['TWEET_HISTORIC_LINE']
+
+    if len(tweet + '\n\n' + os.environ['TWEET_TAGLINE']) <= 280:
+        tweet = tweet + '\n\n' + os.environ['TWEET_TAGLINE']
     
     status = twitter.update_status(tweet)
 
@@ -53,5 +57,5 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'text/html'},
-        'body': 'Success!'
+        'body': 'Success! Posted tweet: ' + tweet
     }

@@ -49,7 +49,7 @@ def get_meetings_data(url, host_type, public_body_id):
                 .strptime(
                     meeting_row.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(),
                     '%d/%m/%Y') \
-                .strftime('%B %-d')
+                .strftime('%Y-%m-%d')
 
             meeting['id'] = hashlib \
                 .md5(json.dumps(meeting, sort_keys = True).encode('utf-8')) \
@@ -144,6 +144,7 @@ def lambda_handler(event, context):
                 meeting['guests_string'] = join_with_and([g['name'] for g in meeting['guests']])
                 meeting['hosts_string_twitter'] = ' '.join([hosts_title, join_with_and(hosts_twitter)])
                 meeting['guests_string_twitter'] = ' '.join([guests_title, join_with_and(guests_twitter)])
+                meeting['date_string'] = datetime.strptime(meeting['date'], '%Y-%m-%d').strftime('%B %-d')
                 
                 tweet = os.environ['TWEET_TEMPLATE'].format(**meeting)
 

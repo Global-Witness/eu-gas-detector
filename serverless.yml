@@ -32,11 +32,10 @@ provider:
     GUESTS_TEMPLATE: gas companies
     HOST_TEMPLATE: EU official
     HOSTS_TEMPLATE: EU officials
-    TWEET_TEMPLATE: >-
-      Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} was scheduled for {date}.
- 
-      
-      Just like big tobacco is banned from lobbying on health, we need #FossilFreePolitics to achieve #ClimateAction
+    TWEET_TEMPLATE: Gas detected! A meeting between {hosts_string_twitter} and {guests_string_twitter} was scheduled for {date_string}
+    TWEET_TAGLINE: "Just like big tobacco is banned from lobbying on health, we need #FossilFreePolitics to achieve #ClimateAction"
+    TWEET_HISTORIC_LINE: ", but was only just published"
+    TWEET_HISTORIC_CUTOFF_DAYS: 14
     FOI_SUBJECT_TEMPLATE: "Access to documents request: {date} meeting between {hosts_string} and {guests_string}"
     FOI_BODY_TEMPLATE: >-
       Dear Sir or Madam,
@@ -45,7 +44,7 @@ provider:
       Referring to Regulation (EC) No 1049/2001 on public access to EU documents and to the 'Aarhus Convention' I would herewith like to ask for access to the following:
       
       
-      All documents—including but not limited to correspondence, emails, minutes, notes (hand written or electronic), audio or video recordings, verbatim reports, operational conclusions, lines to take, briefings, and presentations—related to the meeting on {date} between {hosts_string} and {guests_string}.
+      All documents—including but not limited to correspondence, emails, minutes, notes (hand written or electronic), audio or video recordings, verbatim reports, operational conclusions, lines to take, briefings, and presentations—related to the meeting on {date_string} between {hosts_string} and {guests_string}.
       
       
       In consideration of the environment and the current circumstances with the COVID pandemic I would prefer to receive documents electronically.
