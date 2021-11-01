@@ -32,7 +32,7 @@ def get_meetings_data(url, host_type, public_body_id):
   
             meeting = {
                 'public_body_id': public_body_id,
-                'hosts': hosts,
+                'hosts': sorted(hosts),
                 'guests': []
             }
 
@@ -44,13 +44,13 @@ def get_meetings_data(url, host_type, public_body_id):
                         urllib.parse.urlsplit(
                             guest.xpath('.//a/@href')[0]).query)['id'][0]
                     })
-            
+
             meeting['date'] = datetime \
                 .strptime(
                     meeting_row.xpath('.//td[{date}]/text()'.format(**column_indices))[0].strip(),
                     '%d/%m/%Y') \
                 .strftime('%Y-%m-%d')
-
+            
             meeting['id'] = hashlib \
                 .md5(json.dumps(meeting, sort_keys = True).encode('utf-8')) \
                 .hexdigest()
