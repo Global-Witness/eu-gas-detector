@@ -1,10 +1,11 @@
 service: eu-gas-detector
+useDotenv: true
 
-frameworkVersion: '2'
+frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: python3.6
+  runtime: python3.9
   region: eu-west-1
   iamRoleStatements:
     - Effect: Allow
