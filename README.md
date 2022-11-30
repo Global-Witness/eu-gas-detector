@@ -4,7 +4,7 @@ This repository contains a couple of [AWS Lambda](https://aws.amazon.com/lambda/
 
 ## Usage
 
-To run your own version of the bot, create a `.env` file in the root of this repository and fill in the environment variables listed below, then edit `serverless.yml` to tweak the template text and deploy it using `serverless deploy`. As well as AWS Lambda for hosting the functions and SES for sending emails, you'll need a Twitter account linked to a registered [Twitter app](https://developer.twitter.com/en) and an account on [AskTheEU.org](https://www.asktheeu.org/) for sending freedom of information (FOI) requests.
+To run your own version of the bot, create a `.env` file in the root of this repository and fill in the environment variables listed below. Use the following magic spell to create a Lambda 'layer' including the required Python packages: `docker run -v "$PWD":/var/task "lambci/lambda:build-python3.8" /bin/sh -c "pip install -r requirements.txt -t packages; exit"`. Then edit `serverless.yml` to tweak the template text and deploy it using `serverless deploy`. As well as AWS Lambda for hosting the functions and SES for sending emails, you'll need a Twitter account linked to a registered [Twitter app](https://developer.twitter.com/en) and an account on [AskTheEU.org](https://www.asktheeu.org/) for sending freedom of information (FOI) requests.
 
 ## Environment variables
 

@@ -5,7 +5,7 @@ frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.8
   region: eu-west-1
   iamRoleStatements:
     - Effect: Allow
@@ -70,6 +70,12 @@ provider:
       
       Barnaby Pace 
 
+layers:
+  python-packages:
+    path: packages
+    name: ${sls:stage}-python-packages
+    description: Required Python binaries
+
 functions:
   detector:
     handler: detector.lambda_handler
@@ -86,6 +92,7 @@ functions:
 package:
   include:
    - data/**
+   - packages/**
 
 plugins:
   - serverless-python-requirements
