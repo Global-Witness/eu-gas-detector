@@ -70,12 +70,6 @@ provider:
       
       Barnaby Pace 
 
-layers:
-  python-packages:
-    path: packages
-    name: ${sls:stage}-python-packages
-    description: Required Python binaries
-
 functions:
   detector:
     handler: detector.lambda_handler
@@ -92,7 +86,6 @@ functions:
 package:
   include:
    - data/**
-   - packages/**
 
 plugins:
   - serverless-python-requirements
